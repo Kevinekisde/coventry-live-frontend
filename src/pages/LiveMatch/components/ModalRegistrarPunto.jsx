@@ -1,25 +1,28 @@
+// ── ModalRegistrarPunto.jsx ────────────────────────────────────
 import React, { useEffect } from 'react';
 import {
   Modal, Form, Select, Avatar, Tag,
-  Input, Divider, Row, Col, Checkbox, Tooltip,
+  Input, Divider, Row, Col, Checkbox, Tooltip, Grid,
 } from 'antd';
 import { UserOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
+const { useBreakpoint } = Grid;
+
 const TIPOS_FINALIZACION = [
-  { value: 'ataque',      label: '⚡ Ataque'            },
-  { value: 'ace',         label: '🚀 Ace (saque)'       },
-  { value: 'bloqueo',     label: '🛡 Bloqueo'           },
-  { value: 'error_rival', label: '✅ Error del rival'    },
-  { value: 'error_local', label: '❌ Error propio'       },
-  { value: 'otro',        label: '• Otro'                },
+  { value: 'ataque',      label: '⚡ Ataque'          },
+  { value: 'ace',         label: '🚀 Ace (saque)'     },
+  { value: 'bloqueo',     label: '🛡 Bloqueo'         },
+  { value: 'error_rival', label: '✅ Error del rival'  },
+  { value: 'error_local', label: '❌ Error propio'     },
+  { value: 'otro',        label: '• Otro'              },
 ];
 
 const TIPOS_ATAQUE = [
-  { value: 'primer_tiempo',  label: '⚡ 1er tiempo (bola rápida al central)' },
-  { value: 'segundo_tiempo', label: '📐 2do tiempo (punta / opuesto)'        },
-  { value: 'pipe',           label: '🔁 Pipe (ataque desde el fondo)'        },
-  { value: 'finta',          label: '🤏 Finta / toque'                       },
-  { value: 'otro',           label: '• Otro'                                 },
+  { value: 'primer_tiempo',  label: '⚡ 1er tiempo' },
+  { value: 'segundo_tiempo', label: '📐 2do tiempo' },
+  { value: 'pipe',           label: '🔁 Pipe'       },
+  { value: 'finta',          label: '🤏 Finta'      },
+  { value: 'otro',           label: '• Otro'         },
 ];
 
 const POSICION_COLOR = {
@@ -27,7 +30,6 @@ const POSICION_COLOR = {
   Central: 'orange', Líbero: 'cyan', Auxiliar: 'default',
 };
 
-// Zonas: fila 0 = frente (red), fila 1 = fondo
 const ZONAS = [
   { zona: 4, label: 'Z4', desc: 'Punta izq. frente'  },
   { zona: 3, label: 'Z3', desc: 'Centro frente'       },
@@ -37,20 +39,19 @@ const ZONAS = [
   { zona: 1, label: 'Z1', desc: 'Punta der. fondo'    },
 ];
 
-function SelectorZona({ value, onChange }) {
+function SelectorZona({ value, onChange, isMobile }) {
   return (
     <div>
       <div style={{
-        textAlign: 'center', fontSize: 11, color: '#9ca3af',
-        marginBottom: 6, letterSpacing: 2, fontWeight: 600,
+        textAlign: 'center', fontSize: 10, color: '#9ca3af',
+        marginBottom: 5, letterSpacing: 2, fontWeight: 600,
       }}>
         ── RED ──
       </div>
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 6,
-        maxWidth: 260,
+        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: isMobile ? 5 : 6,
+        maxWidth: isMobile ? '100%' : 260,
         margin: '0 auto',
       }}>
         {ZONAS.map(({ zona, label, desc }) => {
@@ -61,35 +62,38 @@ function SelectorZona({ value, onChange }) {
                 type="button"
                 onClick={() => onChange(seleccionada ? null : zona)}
                 style={{
-                  height: 56,
+                  height: isMobile ? 48 : 56,
                   borderRadius: 8,
                   border: `2px solid ${seleccionada ? '#ff4fb4' : '#e5e7eb'}`,
                   background: seleccionada ? '#ff4fb4' : '#f9fafb',
                   color: seleccionada ? '#fff' : '#6b7280',
                   fontWeight: 700,
-                  fontSize: 15,
+                  fontSize: isMobile ? 13 : 15,
                   cursor: 'pointer',
                   transition: 'all 0.15s',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 2,
+                  gap: 1,
                   width: '100%',
                 }}
               >
                 <span>{label}</span>
-                <span style={{ fontSize: 9, fontWeight: 400, opacity: 0.7, lineHeight: 1.2 }}>
-                  {desc}
-                </span>
+                {/* Desc solo en desktop — muy pequeño en móvil */}
+                {!isMobile && (
+                  <span style={{ fontSize: 9, fontWeight: 400, opacity: 0.7, lineHeight: 1.2 }}>
+                    {desc}
+                  </span>
+                )}
               </button>
             </Tooltip>
           );
         })}
       </div>
       <div style={{
-        textAlign: 'center', fontSize: 11, color: '#9ca3af',
-        marginTop: 6, letterSpacing: 2, fontWeight: 600,
+        textAlign: 'center', fontSize: 10, color: '#9ca3af',
+        marginTop: 5, letterSpacing: 2, fontWeight: 600,
       }}>
         ── FONDO ──
       </div>
@@ -97,16 +101,17 @@ function SelectorZona({ value, onChange }) {
   );
 }
 
-// ← Este wrapper es la clave: Form.Item le pasa value y onChange automáticamente
-function ZonaInput({ value, onChange }) {
-  return <SelectorZona value={value} onChange={onChange} />;
+function ZonaInput({ value, onChange, isMobile }) {
+  return <SelectorZona value={value} onChange={onChange} isMobile={isMobile} />;
 }
 
 export default function ModalRegistrarPunto({
   open, equipoGanador, partido,
-  onConfirm, onCancel, confirmLoading,
+  onConfirm, onCancel, confirmLoading, isMobile,
 }) {
   const [form] = Form.useForm();
+  const screens = useBreakpoint();
+  const mobile  = isMobile ?? !screens.md;
 
   const esLocal     = equipoGanador === 'local';
   const nominaLocal = partido?.nomina || [];
@@ -117,18 +122,19 @@ export default function ModalRegistrarPunto({
   const opcionesJugadores = nominaLocal.map((n) => ({
     value: n.jugador._id,
     label: (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Avatar size={22} icon={<UserOutlined />}
-          style={{ background: '#1a3a5c', fontSize: 10, flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <Avatar size={20} icon={<UserOutlined />}
+          style={{ background: '#000101', fontSize: 10, flexShrink: 0 }}>
           {n.jugador.numeroCamiseta}
         </Avatar>
-        <span style={{ fontSize: 13 }}>
+        <span style={{ fontSize: mobile ? 12 : 13 }}>
           #{n.jugador.numeroCamiseta} {n.jugador.nombre} {n.jugador.apellido}
         </span>
-        <Tag color={POSICION_COLOR[n.jugador.posicion]}
-          style={{ margin: 0, fontSize: 10 }}>
-          {n.jugador.posicion}
-        </Tag>
+        {!mobile && (
+          <Tag color={POSICION_COLOR[n.jugador.posicion]} style={{ margin: 0, fontSize: 10 }}>
+            {n.jugador.posicion}
+          </Tag>
+        )}
       </div>
     ),
   }));
@@ -150,27 +156,35 @@ export default function ModalRegistrarPunto({
       onCancel={onCancel}
       onOk={handleOk}
       confirmLoading={confirmLoading}
-      okText="Registrar punto"
+      okText="Registrar"
       cancelText="Cancelar"
-      width={560}
+      // En móvil ocupa casi toda la pantalla desde arriba
+      width={mobile ? '100%' : 560}
+      style={mobile ? { top: 10, margin: 0, padding: 0, maxWidth: '100vw' } : {}}
+      styles={{
+        body: {
+          maxHeight: mobile ? '80vh' : '75vh',
+          overflowY: 'auto',
+          padding: mobile ? '8px 12px' : '12px 16px',
+        },
+      }}
       destroyOnClose
-      styles={{ body: { maxHeight: '75vh', overflowY: 'auto', paddingRight: 4 } }}
       title={
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{
-            width: 12, height: 12, borderRadius: '50%',
-            background: esLocal ? '#ff4fb4' : '#ef4444',
+            width: 10, height: 10, borderRadius: '50%',
+            background: esLocal ? '#ff4fb4' : '#ef4444', flexShrink: 0,
           }} />
-          <span>
+          <span style={{ fontSize: mobile ? 14 : 16 }}>
             Punto para{' '}
             <strong style={{ color: esLocal ? '#ff4fb4' : '#991b1b' }}>
-              {esLocal ? 'Atlético Coventry' : partido?.rival}
+              {esLocal ? (mobile ? 'Coventry' : 'Atlético Coventry') : partido?.rival}
             </strong>
           </span>
         </div>
       }
     >
-      <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+      <Form form={form} layout="vertical" style={{ marginTop: 12 }}>
 
         {/* 1. Tipo de finalización */}
         <Form.Item
@@ -178,14 +192,19 @@ export default function ModalRegistrarPunto({
           label="¿Cómo se ganó el punto?"
           rules={[{ required: true, message: 'Selecciona cómo se ganó el punto' }]}
         >
-          <Select size="large" placeholder="Seleccionar..." options={TIPOS_FINALIZACION} />
+          <Select
+            size={mobile ? 'middle' : 'large'}
+            placeholder="Seleccionar..."
+            options={TIPOS_FINALIZACION}
+          />
         </Form.Item>
 
         {/* 2. Jugador que anotó */}
         {esLocal && (
           <Form.Item name="jugadorPunto" label="Jugador que anotó">
             <Select
-              size="large" placeholder="Seleccionar jugador (opcional)"
+              size={mobile ? 'middle' : 'large'}
+              placeholder="Opcional"
               allowClear options={opcionesJugadores}
               optionLabelProp="label" showSearch={false}
             />
@@ -195,13 +214,11 @@ export default function ModalRegistrarPunto({
         {/* 3. Jugador que erró */}
         <Form.Item
           name="jugadorError"
-          label={esLocal
-            ? 'Jugador que cometió error (si aplica)'
-            : 'Jugador de Coventry que cometió el error'
-          }
+          label={esLocal ? 'Jugador que erró (si aplica)' : 'Jugador de Coventry que erró'}
         >
           <Select
-            size="large" placeholder="Solo si el punto fue por error"
+            size={mobile ? 'middle' : 'large'}
+            placeholder="Solo si fue por error"
             allowClear options={opcionesJugadores}
             optionLabelProp="label" showSearch={false}
           />
@@ -210,8 +227,8 @@ export default function ModalRegistrarPunto({
         {/* 4. Zona y tipo de ataque */}
         {esAtaqueOBloqueo && (
           <>
-            <Divider style={{ margin: '8px 0 16px' }}>
-              <span style={{ fontSize: 12, color: '#6b7280' }}>Datos del ataque</span>
+            <Divider style={{ margin: '6px 0 12px' }}>
+              <span style={{ fontSize: 11, color: '#6b7280' }}>Datos del ataque</span>
             </Divider>
 
             <Form.Item
@@ -219,72 +236,90 @@ export default function ModalRegistrarPunto({
               label={
                 <span>
                   Zona del ataque{' '}
-                  <Tooltip title="Selecciona la zona de la cancha desde donde vino el ataque">
+                  <Tooltip title="Zona desde donde vino el ataque">
                     <InfoCircleOutlined style={{ color: '#ff4fb4' }} />
                   </Tooltip>
                 </span>
               }
             >
-              {/* ZonaInput recibe value y onChange inyectados por Form.Item */}
-              <ZonaInput />
+              {/* Pasamos isMobile al ZonaInput mediante render prop trick */}
+              <Form.Item name="zonaAtaque" noStyle>
+                {({ value, onChange }) => (
+                  <ZonaInput value={value} onChange={onChange} isMobile={mobile} />
+                )}
+              </Form.Item>
             </Form.Item>
 
-            <Form.Item
-              name="tipoAtaque"
-              label="Tipo de ataque"
-              style={{ marginTop: 8 }}
-            >
-              <Select placeholder="Seleccionar tipo..." allowClear options={TIPOS_ATAQUE} />
+            <Form.Item name="tipoAtaque" label="Tipo de ataque" style={{ marginTop: 6 }}>
+              <Select
+                placeholder="Seleccionar tipo..."
+                allowClear
+                // En móvil labels cortos
+                options={mobile
+                  ? TIPOS_ATAQUE.map((t) => ({ ...t, label: t.label.split('(')[0].trim() }))
+                  : TIPOS_ATAQUE
+                }
+              />
             </Form.Item>
           </>
         )}
 
         {/* 5. Contexto del rally */}
-        <Divider style={{ margin: '8px 0 12px' }}>
-          <span style={{ fontSize: 12, color: '#6b7280' }}>Contexto del rally</span>
+        <Divider style={{ margin: '6px 0 10px' }}>
+          <span style={{ fontSize: 11, color: '#6b7280' }}>Contexto</span>
         </Divider>
 
-        <Row gutter={12}>
+        <Row gutter={[8, 0]}>
           <Col span={12}>
             <Form.Item name="pelotaLibre" valuePropName="checked" initialValue={false}>
               <Checkbox>
-                <span style={{ fontWeight: 500 }}>🏐 Pelota libre</span>
-                <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>
-                  El rival mandó pelota fácil
-                </div>
+                <span style={{ fontWeight: 500, fontSize: mobile ? 12 : 14 }}>
+                  🏐 Pelota libre
+                </span>
+                {!mobile && (
+                  <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 1 }}>
+                    El rival mandó pelota fácil
+                  </div>
+                )}
               </Checkbox>
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item name="doblePositiva" valuePropName="checked" initialValue={false}>
               <Checkbox>
-                <span style={{ fontWeight: 500 }}>⭐ Doble positiva</span>
-                <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>
-                  Recepción perfecta → ataque punto
-                </div>
+                <span style={{ fontWeight: 500, fontSize: mobile ? 12 : 14 }}>
+                  ⭐ Doble positiva
+                </span>
+                {!mobile && (
+                  <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 1 }}>
+                    Recepción perfecta → punto
+                  </div>
+                )}
               </Checkbox>
             </Form.Item>
           </Col>
         </Row>
 
         {/* 6. Rotación + Notas */}
-        <Divider style={{ margin: '8px 0 12px' }} />
-        <Row gutter={12}>
+        <Divider style={{ margin: '4px 0 10px' }} />
+        <Row gutter={[8, 0]}>
           <Col span={12}>
-            <Form.Item name="rotacionLocal" label="Rotación Coventry">
+            <Form.Item name="rotacionLocal" label="Rotación">
               <Select
                 placeholder="1 – 6" allowClear
-                options={[1,2,3,4,5,6].map((n) => ({ value: n, label: `Rotación ${n}` }))}
+                options={[1,2,3,4,5,6].map((n) => ({
+                  value: n,
+                  label: mobile ? `Rot. ${n}` : `Rotación ${n}`,
+                }))}
               />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item name="notas" label="Notas">
-              <Input placeholder="Observación corta..." />
+              <Input placeholder="Observación..." />
             </Form.Item>
           </Col>
         </Row>
-
       </Form>
     </Modal>
   );
