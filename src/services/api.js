@@ -5,6 +5,7 @@ const api = axios.create({
   timeout: 10000,
 });
 
+
 api.interceptors.response.use(
   (res) => res.data,
   (err) => {
