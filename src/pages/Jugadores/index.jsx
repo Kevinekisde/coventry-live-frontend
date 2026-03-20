@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Table, Button, Tag, Space, Input, Select, Card,
   Modal, Form, InputNumber, Avatar, Tooltip,
-  App, Popconfirm, Row, Col, Statistic,
+  App, Popconfirm, Row, Col, Statistic, Grid,
 } from 'antd';
 import {
   PlusOutlined, EditOutlined, UserDeleteOutlined,
@@ -10,6 +10,8 @@ import {
   TrophyOutlined,
 } from '@ant-design/icons';
 import { jugadoresService } from '../../services/jugadores.service';
+
+const { useBreakpoint } = Grid;
 
 const POSICIONES = ['Armador', 'Opuesto', 'Punta', 'Central', 'Líbero', 'Auxiliar'];
 const POSICION_COLOR = {
@@ -19,6 +21,9 @@ const POSICION_COLOR = {
 
 export default function Jugadores() {
   const { message } = App.useApp();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+
   const [jugadores, setJugadores]   = useState([]);
   const [loading, setLoading]       = useState(false);
   const [modalOpen, setModalOpen]   = useState(false);
@@ -50,23 +55,9 @@ export default function Jugadores() {
     );
   });
 
-  const abrirCrear = () => {
-    setEditando(null);
-    form.resetFields();
-    setModalOpen(true);
-  };
-
-  const abrirEditar = (j) => {
-    setEditando(j);
-    form.setFieldsValue(j);
-    setModalOpen(true);
-  };
-
-  const cerrarModal = () => {
-    setModalOpen(false);
-    setEditando(null);
-    form.resetFields();
-  };
+  const abrirCrear = () => { setEditando(null); form.resetFields(); setModalOpen(true); };
+  const abrirEditar = (j) => { setEditando(j); form.setFieldsValue(j); setModalOpen(true); };
+  const cerrarModal = () => { setModalOpen(false); setEditando(null); form.resetFields(); };
 
   const guardar = async () => {
     try {
@@ -98,7 +89,8 @@ export default function Jugadores() {
     }
   };
 
-  const columns = [
+  // ── Columnas desktop ──────────────────────────────────────
+  const columnsDesktop = [
     {
       title: '#',
       dataIndex: 'numeroCamiseta',
@@ -106,7 +98,7 @@ export default function Jugadores() {
       sorter: (a, b) => a.numeroCamiseta - b.numeroCamiseta,
       defaultSortOrder: 'ascend',
       render: (n) => (
-        <span style={{ color: '#1a3a5c', fontWeight: 700, fontSize: 18 }}>{n}</span>
+        <span style={{ color: '#ff4fb4', fontWeight: 700, fontSize: 18 }}>{n}</span>
       ),
     },
     {
@@ -114,7 +106,7 @@ export default function Jugadores() {
       render: (_, j) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Avatar size={40} icon={<UserOutlined />} src={j.foto}
-            style={{ background: '#1a3a5c', flexShrink: 0 }} />
+            style={{ background: '#000101', flexShrink: 0 }} />
           <div>
             <div style={{ fontWeight: 600, color: '#1f2937' }}>
               {j.nombre} {j.apellido}
@@ -169,86 +161,164 @@ export default function Jugadores() {
     },
   ];
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+  // ── Columnas móvil — compactas ────────────────────────────
+  const columnsMobile = [
+    {
+      title: '#',
+      dataIndex: 'numeroCamiseta',
+      width: 44,
+      render: (n) => (
+        <span style={{ color: '#ff4fb4', fontWeight: 700, fontSize: 16 }}>{n}</span>
+      ),
+    },
+    {
+      title: 'Jugador',
+      render: (_, j) => (
         <div>
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#1f2937' }}>Plantel</h1>
-          <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: 13 }}>
-            Atlético Coventry — jugadores activos
-          </p>
+          <div style={{ fontWeight: 600, color: '#1f2937', fontSize: 14 }}>
+            {j.nombre} {j.apellido}
+          </div>
+          <div style={{ display: 'flex', gap: 6, marginTop: 3, flexWrap: 'wrap' }}>
+            <Tag color={POSICION_COLOR[j.posicion]} style={{ margin: 0, fontSize: 11 }}>
+              {j.posicion}
+            </Tag>
+            {j.altura && (
+              <span style={{ fontSize: 11, color: '#9ca3af' }}>{j.altura} cm</span>
+            )}
+          </div>
         </div>
-        <Button type="primary" icon={<PlusOutlined />} size="large" onClick={abrirCrear}>
-          Agregar Jugador
+      ),
+    },
+    {
+      title: '',
+      width: 72,
+      render: (_, j) => (
+        <Space size={4}>
+          <Button size="small" type="text" icon={<EditOutlined />}
+            onClick={() => abrirEditar(j)} />
+          <Popconfirm
+            title="¿Remover del plantel?"
+            onConfirm={() => desactivar(j)}
+            okText="Remover" cancelText="Cancelar"
+            okButtonProps={{ danger: true }}
+          >
+            <Button size="small" type="text" danger icon={<UserDeleteOutlined />} />
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 12 : 20 }}>
+
+      {/* ── Header ── */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: isMobile ? 'center' : 'flex-start',
+      }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: isMobile ? 20 : 24, fontWeight: 700, color: '#1f2937' }}>
+            Plantel
+          </h1>
+          {!isMobile && (
+            <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: 13 }}>
+              Atlético Coventry — jugadores activos
+            </p>
+          )}
+        </div>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          size={isMobile ? 'middle' : 'large'}
+          onClick={abrirCrear}
+        >
+          {isMobile ? 'Agregar' : 'Agregar Jugador'}
         </Button>
       </div>
 
-      {/* Cards por posición */}
-      <Row gutter={12}>
+      {/* ── Cards por posición ── */}
+      <Row gutter={[8, 8]}>
         {POSICIONES.map((pos) => (
-          <Col key={pos} xs={12} sm={8} md={4}>
+          <Col key={pos} xs={8} sm={8} md={4}>
             <Card size="small" style={{ textAlign: 'center' }}>
-              <Statistic
-                title={<Tag color={POSICION_COLOR[pos]} style={{ margin: 0 }}>{pos}</Tag>}
-                value={jugadores.filter((j) => j.posicion === pos).length}
-                valueStyle={{ fontSize: 22, color: '#1a3a5c', fontWeight: 700 }}
-              />
+              <div style={{ marginBottom: 4 }}>
+                <Tag color={POSICION_COLOR[pos]} style={{ margin: 0, fontSize: isMobile ? 10 : 12 }}>
+                  {isMobile ? pos.slice(0, 3) : pos}
+                </Tag>
+              </div>
+              <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: '#ff4fb4' }}>
+                {jugadores.filter((j) => j.posicion === pos).length}
+              </div>
             </Card>
           </Col>
         ))}
       </Row>
 
-      {/* Tabla */}
-      <Card>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* ── Tabla ── */}
+      <Card bodyStyle={{ padding: isMobile ? '12px 8px' : 24 }}>
+
+        {/* Filtros */}
+        <div style={{
+          display: 'flex', gap: 8, marginBottom: 12,
+          flexDirection: isMobile ? 'column' : 'row',
+          flexWrap: 'wrap', alignItems: isMobile ? 'stretch' : 'center',
+        }}>
           <Input
             placeholder="Buscar por nombre o número..."
             prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             allowClear
-            style={{ width: 260 }}
+            style={{ width: isMobile ? '100%' : 260 }}
           />
-          <Select
-            placeholder="Filtrar posición"
-            allowClear
-            value={filtroPosicion}
-            onChange={setFiltro}
-            style={{ width: 180 }}
-            options={POSICIONES.map((p) => ({ value: p, label: p }))}
-          />
-          <Button icon={<ReloadOutlined />} onClick={cargar}>Actualizar</Button>
-          <span style={{ marginLeft: 'auto', color: '#9ca3af', fontSize: 13 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Select
+              placeholder="Posición"
+              allowClear
+              value={filtroPosicion}
+              onChange={setFiltro}
+              style={{ flex: 1, minWidth: 130 }}
+              options={POSICIONES.map((p) => ({ value: p, label: p }))}
+            />
+            <Button icon={<ReloadOutlined />} onClick={cargar} />
+          </div>
+          <span style={{
+            color: '#9ca3af', fontSize: 12,
+            marginLeft: isMobile ? 0 : 'auto',
+          }}>
             {jugadoresFiltrados.length} jugador{jugadoresFiltrados.length !== 1 ? 'es' : ''}
           </span>
         </div>
 
         <Table
-          columns={columns}
+          columns={isMobile ? columnsMobile : columnsDesktop}
           dataSource={jugadoresFiltrados}
           rowKey="_id"
           loading={loading}
-          pagination={{ pageSize: 15, showSizeChanger: false }}
-          size="middle"
+          pagination={{ pageSize: isMobile ? 10 : 15, showSizeChanger: false }}
+          size={isMobile ? 'small' : 'middle'}
+          scroll={isMobile ? undefined : { x: 600 }}
         />
       </Card>
 
-      {/* Modal */}
+      {/* ── Modal ── */}
       <Modal
         title={
           <Space>
-            <TrophyOutlined style={{ color: '#1a3a5c' }} />
-            {editando ? 'Editar Jugador' : 'Agregar Jugador al Plantel'}
+            <TrophyOutlined style={{ color: '#ff4fb4' }} />
+            {editando ? 'Editar Jugador' : 'Agregar Jugador'}
           </Space>
         }
         open={modalOpen}
         onCancel={cerrarModal}
         onOk={guardar}
-        okText={editando ? 'Guardar cambios' : 'Agregar'}
+        okText={editando ? 'Guardar' : 'Agregar'}
         cancelText="Cancelar"
         confirmLoading={guardando}
-        width={520}
+        width={isMobile ? '95vw' : 520}
+        style={isMobile ? { top: 20 } : {}}
         destroyOnClose
       >
         <Form
@@ -260,14 +330,14 @@ export default function Jugadores() {
           <Row gutter={12}>
             <Col span={12}>
               <Form.Item name="nombre" label="Nombre"
-                rules={[{ required: true, message: 'Ingresa el nombre' }]}>
-                <Input placeholder="Ej: Juan" />
+                rules={[{ required: true, message: 'Requerido' }]}>
+                <Input placeholder="Juan" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item name="apellido" label="Apellido"
-                rules={[{ required: true, message: 'Ingresa el apellido' }]}>
-                <Input placeholder="Ej: Pérez" />
+                rules={[{ required: true, message: 'Requerido' }]}>
+                <Input placeholder="Pérez" />
               </Form.Item>
             </Col>
           </Row>
@@ -281,7 +351,7 @@ export default function Jugadores() {
             </Col>
             <Col span={16}>
               <Form.Item name="posicion" label="Posición"
-                rules={[{ required: true, message: 'Selecciona la posición' }]}>
+                rules={[{ required: true, message: 'Requerido' }]}>
                 <Select
                   placeholder="Seleccionar..."
                   options={POSICIONES.map((p) => ({
@@ -297,8 +367,8 @@ export default function Jugadores() {
             <Col span={12}>
               <Form.Item name="mano" label="Mano hábil">
                 <Select options={[
-                  { value: 'Derecha', label: 'Derecha' },
-                  { value: 'Izquierda', label: 'Izquierda' },
+                  { value: 'Derecha',    label: 'Derecha'    },
+                  { value: 'Izquierda',  label: 'Izquierda'  },
                 ]} />
               </Form.Item>
             </Col>
