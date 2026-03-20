@@ -80,7 +80,6 @@ function SelectorZona({ value, onChange, isMobile }) {
                 }}
               >
                 <span>{label}</span>
-                {/* Desc solo en desktop — muy pequeño en móvil */}
                 {!isMobile && (
                   <span style={{ fontSize: 9, fontWeight: 400, opacity: 0.7, lineHeight: 1.2 }}>
                     {desc}
@@ -101,6 +100,7 @@ function SelectorZona({ value, onChange, isMobile }) {
   );
 }
 
+// ✅ Control custom — Ant Design inyecta value/onChange automáticamente
 function ZonaInput({ value, onChange, isMobile }) {
   return <SelectorZona value={value} onChange={onChange} isMobile={isMobile} />;
 }
@@ -158,7 +158,6 @@ export default function ModalRegistrarPunto({
       confirmLoading={confirmLoading}
       okText="Registrar"
       cancelText="Cancelar"
-      // En móvil ocupa casi toda la pantalla desde arriba
       width={mobile ? '100%' : 560}
       style={mobile ? { top: 10, margin: 0, padding: 0, maxWidth: '100vw' } : {}}
       styles={{
@@ -224,7 +223,7 @@ export default function ModalRegistrarPunto({
           />
         </Form.Item>
 
-        {/* 4. Zona y tipo de ataque */}
+        {/* 4. Zona y tipo de ataque — ✅ Form.Item simple, sin anidación */}
         {esAtaqueOBloqueo && (
           <>
             <Divider style={{ margin: '6px 0 12px' }}>
@@ -242,19 +241,14 @@ export default function ModalRegistrarPunto({
                 </span>
               }
             >
-              {/* Pasamos isMobile al ZonaInput mediante render prop trick */}
-              <Form.Item name="zonaAtaque" noStyle>
-                {({ value, onChange }) => (
-                  <ZonaInput value={value} onChange={onChange} isMobile={mobile} />
-                )}
-              </Form.Item>
+              {/* ✅ ZonaInput como hijo directo — recibe value/onChange automáticamente */}
+              <ZonaInput isMobile={mobile} />
             </Form.Item>
 
             <Form.Item name="tipoAtaque" label="Tipo de ataque" style={{ marginTop: 6 }}>
               <Select
                 placeholder="Seleccionar tipo..."
                 allowClear
-                // En móvil labels cortos
                 options={mobile
                   ? TIPOS_ATAQUE.map((t) => ({ ...t, label: t.label.split('(')[0].trim() }))
                   : TIPOS_ATAQUE
@@ -320,6 +314,7 @@ export default function ModalRegistrarPunto({
             </Form.Item>
           </Col>
         </Row>
+
       </Form>
     </Modal>
   );
