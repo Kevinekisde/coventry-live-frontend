@@ -1,0 +1,123 @@
+/* LiveMatch.css - Diseño completamente responsive */
+
+/* Base styles (Mobile First) */
+.live-match-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px;
+  min-height: 100vh;
+  max-width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  width: 100%;
+}
+
+.error-alert {
+  margin: 24px auto;
+  max-width: 500px;
+  width: 100%;
+}
+
+.score-section,
+.stats-panel,
+.history-panel {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.content-grid {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Tablets (768px+) */
+@media (min-width: 768px) {
+  .live-match-container {
+    padding: 12px;
+    gap: 16px;
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+  }
+  
+  .loading-center {
+    height: 50vh;
+  }
+}
+
+/* Desktop (992px+) */
+@media (min-width: 992px) {
+  .live-match-container {
+    padding: 16px;
+    max-width: 1200px;
+    gap: 20px;
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr 380px;
+    gap: 20px;
+  }
+}
+
+/* Pantallas muy pequeñas (<480px) */
+@media (max-width: 480px) {
+  .live-match-container {
+    padding: 4px;
+    gap: 8px;
+  }
+  
+  .content-grid {
+    gap: 8px;
+  }
+  
+  /* Optimizar tipografía en móviles pequeños */
+  .anticon,
+  .ant-btn {
+    font-size: 14px !important;
+  }
+}
+
+/* Landscape móvil */
+@media (max-height: 500px) and (orientation: landscape) {
+  .live-match-container {
+    padding: 4px;
+    gap: 8px;
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* Evitar scroll horizontal */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
+/* Mejoras para Ant Design en móvil */
+@media (max-width: 767px) {
+  .ant-modal {
+    max-width: 95vw !important;
+    margin: 0 !important;
+  }
+  
+  .ant-modal-content {
+    padding: 12px !important;
+  }
+}

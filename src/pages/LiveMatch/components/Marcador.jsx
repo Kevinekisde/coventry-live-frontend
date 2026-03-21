@@ -22,13 +22,19 @@ export default function Marcador({
       padding: isMobile ? '16px 16px 20px' : '24px 32px',
       color: '#fff',
       border: `1px solid rgba(255, 79, 180, 0.15)`,
+      width: '100%',
+      boxSizing: 'border-box',
+      overflow: 'hidden',
     }}>
 
       {/* ── Fila superior ── */}
       <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        alignItems: 'center', marginBottom: isMobile ? 14 : 20,
-        flexWrap: 'wrap', gap: 6,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: isMobile ? 14 : 20,
+        flexWrap: 'wrap',
+        gap: 6,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Badge status="processing" color={PINK} />
@@ -66,24 +72,30 @@ export default function Marcador({
         gap: isMobile ? 8 : 16,
         marginBottom: isMobile ? 20 : 28,
       }}>
+
         {/* Coventry */}
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', minWidth: 0 }}>
           <div style={{
             color: PINK,
             fontSize: isMobile ? 9 : 11,
-            fontWeight: 700, marginBottom: 4, letterSpacing: isMobile ? 1 : 2,
+            fontWeight: 700,
+            marginBottom: 4,
+            letterSpacing: isMobile ? 1 : 2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
           }}>
             {isMobile ? 'COVENTRY' : 'ATLÉTICO COVENTRY'}
           </div>
           <div style={{
             fontSize: isMobile ? 72 : 88,
-            fontWeight: 900, lineHeight: 1,
+            fontWeight: 900,
+            lineHeight: 1,
             color: PINK,
             textShadow: `0 0 40px ${PINK}55`,
           }}>
             {puntosLocal}
           </div>
-          {/* Dots sets */}
           <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 4 }}>
             {Array.from({ length: partido.mejorDe }).map((_, i) => (
               <div key={i} style={{
@@ -104,7 +116,8 @@ export default function Marcador({
             fontSize: isMobile ? 20 : 30,
             fontWeight: 700,
             color: 'rgba(255,255,255,0.25)',
-            lineHeight: 1, marginBottom: 4,
+            lineHeight: 1,
+            marginBottom: 4,
           }}>
             {setsLocal} – {setsRival}
           </div>
@@ -114,18 +127,23 @@ export default function Marcador({
         </div>
 
         {/* Rival */}
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', minWidth: 0 }}>
           <div style={{
             color: 'rgba(255,255,255,0.5)',
             fontSize: isMobile ? 9 : 11,
-            fontWeight: 700, marginBottom: 4, letterSpacing: isMobile ? 1 : 2,
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            fontWeight: 700,
+            marginBottom: 4,
+            letterSpacing: isMobile ? 1 : 2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
           }}>
             {partido.rival.toUpperCase()}
           </div>
           <div style={{
             fontSize: isMobile ? 72 : 88,
-            fontWeight: 900, lineHeight: 1,
+            fontWeight: 900,
+            lineHeight: 1,
             color: '#ffffff',
             textShadow: '0 0 40px rgba(255,255,255,0.2)',
           }}>
@@ -145,7 +163,7 @@ export default function Marcador({
         </div>
       </div>
 
-      {/* Separador */}
+      {/* ── Separador ── */}
       <div style={{
         height: 1,
         background: 'linear-gradient(90deg, transparent, rgba(255,79,180,0.3), transparent)',
@@ -154,7 +172,8 @@ export default function Marcador({
 
       {/* ── Botones de punto ── */}
       <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr',
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
         gap: isMobile ? 8 : 12,
         marginBottom: isMobile ? 12 : 16,
       }}>
@@ -162,6 +181,7 @@ export default function Marcador({
           size="large"
           onClick={onPuntoLocal}
           style={{
+            width: '100%',
             height: isMobile ? 56 : 68,
             fontSize: isMobile ? 15 : 18,
             fontWeight: 700,
@@ -178,6 +198,7 @@ export default function Marcador({
           size="large"
           onClick={onPuntoRival}
           style={{
+            width: '100%',
             height: isMobile ? 56 : 68,
             fontSize: isMobile ? 15 : 18,
             fontWeight: 700,
@@ -196,53 +217,69 @@ export default function Marcador({
 
       {/* ── Acciones secundarias ── */}
       {isMobile ? (
-        // Móvil: 3 botones icon-only en fila
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Tooltip title="Deshacer último punto">
-            <Button
-              icon={<UndoOutlined />}
-              disabled={!puedeDeshacer}
-              onClick={onDeshacerPunto}
-              style={{
-                flex: 1, height: 40,
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: puedeDeshacer ? '#fff' : '#475569',
-              }}
-            >
-              Deshacer
-            </Button>
-          </Tooltip>
-          <Tooltip title={`Cerrar Set ${numero}`}>
-            <Button
-              icon={<StopOutlined />}
-              onClick={onCerrarSet}
-              style={{
-                flex: 1, height: 40,
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.15)',
-                color: '#fff',
-              }}
-            >
-              Cerrar Set
-            </Button>
-          </Tooltip>
-          <Tooltip title="Finalizar Partido">
+        // Móvil: grid sin Tooltip para evitar desalineación
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 44px',
+          gap: 8,
+          width: '100%',
+          boxSizing: 'border-box',
+        }}>
+          <Button
+            icon={<UndoOutlined />}
+            disabled={!puedeDeshacer}
+            onClick={onDeshacerPunto}
+            style={{
+              width: '100%',
+              height: 40,
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: puedeDeshacer ? '#fff' : '#475569',
+              fontSize: 13,
+            }}
+          >
+            Deshacer
+          </Button>
+
+          <Button
+            icon={<StopOutlined />}
+            onClick={onCerrarSet}
+            style={{
+              width: '100%',
+              height: 40,
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              color: '#fff',
+              fontSize: 13,
+            }}
+          >
+            Cerrar Set
+          </Button>
+
+          <Tooltip title="Finalizar Partido" placement="topRight">
             <Button
               icon={<MinusCircleOutlined />}
               onClick={onFinalizarPartido}
               style={{
-                height: 40, width: 44,
+                display: 'block',
+                width: '100%',
+                height: 40,
                 background: 'transparent',
                 border: '1px solid rgba(239,68,68,0.4)',
                 color: '#ef4444',
+                padding: 0,
               }}
             />
           </Tooltip>
         </div>
       ) : (
-        // Desktop: botones con texto completo
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        // Desktop: fila con texto completo
+        <div style={{
+          display: 'flex',
+          gap: 8,
+          justifyContent: 'flex-end',
+          flexWrap: 'wrap',
+        }}>
           <Tooltip title="Deshacer último punto">
             <Button
               icon={<UndoOutlined />}

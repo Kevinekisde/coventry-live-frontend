@@ -4,28 +4,29 @@ import {
 } from 'antd';
 import { useParams, useNavigate } from 'react-router-dom';
 import { partidosService } from '../../services/partidos.service';
-import { setsService }     from '../../services/sets.service';
-import { statsService }    from '../../services/stats.service';
-import Marcador            from './components/Marcador';
-import PanelStats          from './components/PanelStats';
+import { setsService } from '../../services/sets.service';
+import { statsService } from '../../services/stats.service';
+import Marcador from './components/Marcador';
+import PanelStats from './components/PanelStats';
 import ModalRegistrarPunto from './components/ModalRegistrarPunto';
-import HistorialRallies    from './components/HistorialRallies';
+import HistorialRallies from './components/HistorialRallies';
+import './LiveMatch.css'; // Archivo CSS responsive
 
 export default function LiveMatch() {
-  const { id }   = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const { message, modal } = App.useApp();
 
-  const [partido,   setPartido]   = useState(null);
+  const [partido, setPartido] = useState(null);
   const [setActivo, setSetActivo] = useState(null);
-  const [rallies,   setRallies]   = useState([]);
-  const [stats,     setStats]     = useState(null);
-  const [loading,   setLoading]   = useState(true);
+  const [rallies, setRallies] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Modal registro de punto
-  const [modalPunto, setModalPunto]       = useState(false);
+  const [modalPunto, setModalPunto] = useState(false);
   const [equipoGanador, setEquipoGanador] = useState(null); // 'local' | 'rival'
-  const [guardando, setGuardando]         = useState(false);
+  const [guardando, setGuardando] = useState(false);
 
   // ── Carga inicial ────────────────────────────────────────
   const cargarPartido = useCallback(async () => {
@@ -175,7 +176,7 @@ export default function LiveMatch() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+      <div className="loading-center">
         <Spin size="large" />
       </div>
     );
@@ -183,35 +184,46 @@ export default function LiveMatch() {
 
   if (!partido || !setActivo) {
     return (
-      <Alert type="error" message="No se pudo cargar el partido" showIcon
-        action={<Button onClick={() => navigate('/partidos')}>Volver</Button>} />
+      <Alert 
+        type="error" 
+        message="No se pudo cargar el partido" 
+        showIcon
+        action={<Button onClick={() => navigate('/partidos')}>Volver</Button>}
+        className="error-alert"
+      />
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="live-match-container">
       {/* ── Marcador principal ── */}
-      <Marcador
-        partido={partido}
-        setActivo={setActivo}
-        onPuntoLocal={() => abrirModalPunto('local')}
-        onPuntoRival={() => abrirModalPunto('rival')}
-        onDeshacerPunto={deshacerUltimoPunto}
-        onCerrarSet={cerrarSet}
-        onFinalizarPartido={finalizarPartido}
-        puedeDeshacer={rallies.length > 0}
-      />
+      <section className="score-section">
+        <Marcador
+          partido={partido}
+          setActivo={setActivo}
+          onPuntoLocal={() => abrirModalPunto('local')}
+          onPuntoRival={() => abrirModalPunto('rival')}
+          onDeshacerPunto={deshacerUltimoPunto}
+          onCerrarSet={cerrarSet}
+          onFinalizarPartido={finalizarPartido}
+          puedeDeshacer={rallies.length > 0}
+        />
+      </section>
 
       {/* ── Cuerpo: stats + historial ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16 }}>
+      <div className="content-grid">
         {/* Stats en vivo */}
-        <PanelStats stats={stats} partido={partido} />
+        <section className="stats-panel">
+          <PanelStats stats={stats} partido={partido} />
+        </section>
 
         {/* Historial del set */}
-        <HistorialRallies
-          rallies={rallies}
-          setNumero={setActivo.numero}
-        />
+        <section className="history-panel">
+          <HistorialRallies
+            rallies={rallies}
+            setNumero={setActivo.numero}
+          />
+        </section>
       </div>
 
       {/* ── Modal registrar punto ── */}
